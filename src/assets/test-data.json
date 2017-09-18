@@ -1,0 +1,30 @@
+[
+    {
+        "name": "Egypt",
+        "thumbnail": "//source.unsplash.com/900x600?egypt",
+        "mimetype": "image/png",
+        "size": "720KB",
+        "icon": "image"
+    },
+    {
+        "name": "Beach",
+        "thumbnail": "//source.unsplash.com/900x600?beach",
+        "mimetype": "image/png",
+        "size": "620KB",
+        "icon": "image"
+    },
+    {
+        "name": "Mountains",
+        "thumbnail": "//source.unsplash.com/900x600?mountains",
+        "mimetype": "image/png",
+        "size": "166KB",
+        "icon": "image"
+    },
+    {
+        "name": "Lake",
+        "thumbnail": "//source.unsplash.com/900x600?lake",
+        "mimetype": "image/png",
+        "size": "126KB",
+        "icon": "image"
+    }
+]
