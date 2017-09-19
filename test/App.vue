@@ -8,7 +8,16 @@
           :url="url"
           v-model="model"
           :categories="menus"
-          search="Egypt"
+          search
+          multiple
+          :old='[{
+            "name": "Egypt",
+            "thumbnail": "//source.unsplash.com/900x600?egypt",
+            "mimetype": "image/png",
+            "size": "720KB",
+            "icon": "image",
+            "active": true
+          }]'
           @selected="getValue"
         ></v-mediabox>
 
@@ -17,13 +26,10 @@
         </pre>
 
         <p>Display selected item from mediabox</p>
-        <v-card v-if="dataset" role="button" @click.stop="model = true">
+        <v-card class="mb-3" v-for="(dataset, i) in dataset" :key="i" role="button" @click.stop="model = true">
           <v-card-media height="250px" :src="dataset.thumbnail">
             <v-container fill-height fluid class="pa-0 white--text">
               <v-layout column>
-                <v-slide-y-transition>
-                  <v-icon ripple class="display-4 pa-4 success--text" v-if="dataset.active">check</v-icon>
-                </v-slide-y-transition>
                 <v-card-title class="subheading" v-html="dataset.name"></v-card-title>
                 <v-spacer></v-spacer>
                 <v-card-actions class="px-2 white--text">

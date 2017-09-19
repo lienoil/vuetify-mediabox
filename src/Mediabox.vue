@@ -7,16 +7,7 @@
         hide-overlay
     >
         <v-card flat tile class="grey lighten-4">
-            <v-slide-y-transition>
-                <v-toolbar
-                  class="white"
-                  dense
-                  v-show="searchform.model"
-                >
-                    <v-text-field v-model="search" append-icon="search" hide-details single-line></v-text-field>
-                </v-toolbar>
-            </v-slide-y-transition>
-            <v-toolbar class="grey darken-4 white--text">
+            <v-toolbar class="accent white--text">
                 <slot name="toolbar">
                     <v-menu transition="slide-y-transition">
                         <v-btn flat slot="activator" class="white--text">
@@ -43,10 +34,9 @@
                 </slot>
                 <v-spacer></v-spacer>
 
-                <div class="searchform-container">
-                    <input v-model="searchform.query" class="searchform" type="text" placeholder="Search">
-                    <i class="material-icons icon">search</i>
-                </div>
+                <slot name="searchform" :searchform="searchform.query">
+                    <v-text-field :prepend-icon="searchform.prepend" :prefix="searchform.prefix" @input="searchbox().search(searchform.query, $event)" placeholder="Search" light solo hide-details single-line append-icon="search" v-model="searchform.query"></v-text-field>
+                </slot>
 
                 <v-btn v-if="!loading.model" dark icon @click.stop="dialogbox().close()"><v-icon>close</v-icon></v-btn>
 
@@ -56,22 +46,38 @@
             <!-- <v-divider></v-divider> -->
 
             <v-container fluid fill-height grid-list-lg>
-                <v-layout row wrap fill-height class="pt-4">
+                <template v-if="dataset.items.length === 0">
+                    <slot name="empty-result">
+                        <v-layout row wrap fill-height>
+                            <v-flex>
+                                <div class="text-xs-center grey--text">
+                                    <v-icon class="display-4 grey--text">fa-frown-o</v-icon>
+                                    <div>There seems to be only loneliness here</div>
+                                </div>
+                            </v-flex>
+                        </v-layout>
+                    </slot>
+                </template>
+            </v-container>
+
+            <v-container fluid fill-height grid-list-lg>
+
+                <v-layout row wrap fill-height>
 
                     <slot name="content">
-                        <v-flex v-for="(dataset, i) in dataset.items" :key="i">
-                            <v-scale-transition>
+                        <v-flex v-for="(dataset, i) in api().dataset().get()" :key="i">
+                            <v-slide-y-transition>
                                 <div class="media--item" role="button" @click="mediabox().select(dataset)">
                                     <!-- @click.stop="computedDataset.select($event, item)" -->
                                     <slot name="media">
                                         <v-card class="elevation-1">
-                                            <v-card-media :height="height" :src="dataset.thumbnail">
+                                            <v-card-media style="min-width:300px" :height="height" :src="dataset.thumbnail">
                                                 <v-container fill-height fluid class="pa-0 white--text">
                                                     <v-layout column>
-                                                        <v-slide-y-transition>
-                                                            <v-icon ripple class="display-4 pa-4 success--text" v-if="dataset.active">check</v-icon>
-                                                        </v-slide-y-transition>
                                                         <v-card-title class="subheading" v-html="dataset.name"></v-card-title>
+                                                        <v-slide-y-transition>
+                                                            <v-icon ripple class="display-4 pa-1 text-xs-center white--text" v-show="dataset.active">check</v-icon>
+                                                        </v-slide-y-transition>
                                                         <v-spacer></v-spacer>
                                                         <v-card-actions class="px-2 white--text">
                                                             <v-icon class="white--text" v-html="dataset.icon"></v-icon>
@@ -82,11 +88,10 @@
                                                     </v-layout>
                                                 </v-container>
                                             </v-card-media>
-
                                         </v-card>
                                     </slot>
                                 </div>
-                            </v-scale-transition>
+                            </v-slide-y-transition>
                         </v-flex>
                     </slot>
 
@@ -107,6 +112,8 @@
         props: {
             categories: { type: Array, default: () => { return [] } },
             height: { type: String, default: '250px' },
+            multiple: { type: Boolean, default: false },
+            old: { type: Array, default: () => { return [] } },
             open: true,
             search: { type: String, default: null },
             selected: {},
@@ -115,21 +122,25 @@
         data () {
             return {
                 dataset: {
-                    selected: {},
-                    items: []
+                    clone: [],
+                    items: [],
+                    selected: []
                 },
                 dialog: {
                     model: false
                 },
                 media: {
                     model: null,
-                    selected: null
                 },
                 loading: {
                     model: true
                 },
                 searchform: {
-                    model: false
+                    prefix: "",
+                    prepend: '',
+                    model: false,
+                    query: null,
+                    results: []
                 },
                 toolbar: {
                     model: true,
@@ -164,7 +175,10 @@
             this.toolbar.items.category.items = this.categories
             this.toolbar.items.category.selected = this.toolbar.items.category.items[0]
 
-            this.api().get(this.url, this.query).then(data => {
+            // Searchform mount
+            this.searchform.query = this.search
+
+            this.api().get(this.toolbar.items.category.selected.url, this.toolbar.items.category.selected.query).then(data => {
                 this.dataset.items = data.items
             })
         },
@@ -173,6 +187,45 @@
                 let self = this
 
                 return {
+                    dataset () {
+                        return {
+                            set (items) {
+                                self.dataset.items = Object.assign(self.dataset.selected, items)
+                                self.dataset.clone = Object.assign(self.dataset.selected, items)
+                                self.$emit('set-items', self.dataset.items)
+                                return self
+                            },
+
+                            get () {
+                                self.$emit('get-items', self.dataset.items)
+                                return self.dataset.items
+                            },
+
+                            select (selected) {
+                                console.log(self.multiple)
+                                if (self.multiple) {
+                                    if (selected.active) {
+                                        selected.active = false
+                                        self.dataset.selected.splice(selected, 1)
+                                        self.$emit('item-selected', self.dataset.selected)
+
+                                        return self
+                                    }
+                                    selected.active = true
+                                    self.dataset.selected.push(selected)
+                                } else {
+                                    // Single
+                                    selected.active = true
+                                    self.dataset.selected = selected
+                                }
+
+                                self.$emit('item-selected', self.dataset.selected)
+
+                                return self
+                            }
+                        }
+                    },
+
                     get (url, query) {
                         return new Promise((resolve, reject) => {
                             self.$http.get(url, query).then((response) => {
@@ -198,7 +251,7 @@
                             select (item) {
                                 self.toolbar.items.category.selected = item
                                 self.api().get(item.url, item.query).then(data => {
-                                    self.dataset.items = data.items
+                                    self.api().dataset().set(data.items)
                                 })
                                 self.$emit('category-change', item)
                             }
@@ -212,8 +265,12 @@
 
                 return {
                     select (item) {
-                        self.dataset.selected = item
-                        self.dialogbox().toggle()
+                        self.api().dataset().select(item)
+                        // self.searchbox().clear()
+
+                        if (! self.multiple) {
+                            self.dialogbox().toggle()
+                        }
                     }
                 }
             },
@@ -234,6 +291,58 @@
                         self.dialog.model = true
                     }
                 }
+            },
+
+            searchbox () {
+                let self = this
+
+                return {
+                    clear () {
+                        self.searchbox().search("")
+                    },
+
+                    search (query, $event) {
+                        self.loading.model = true
+
+                        self.dataset.items = self.dataset.clone
+
+                        let specificQuery = query.split(':');
+                        if (specificQuery.length > 1) {
+                            self.searchform.prepend = "fa-filter"
+                        } else {
+                            self.searchform.prepend = ""
+                        }
+
+                        let items = JSON.parse(JSON.stringify(self.dataset.items))
+
+                        let results = items.filter((o) => {
+                            let matches = []
+                            Object.entries(o).forEach((key, index) => {
+                                console.log(key[0].toString(), key[1].toString(), query.toLowerCase())
+
+                                if (specificQuery[1]) {
+                                    if (key[0].toString().toLowerCase().includes(specificQuery[0].toString().toLowerCase())) {
+                                        if (key[1].toString().toLowerCase().includes(specificQuery[1].trim().toString().toLowerCase())) {
+                                            matches.push(o)
+                                        }
+                                    }
+                                } else {
+                                    if (key[1].toString().toLowerCase().includes(query.trim().toString().toLowerCase())) {
+                                        matches.push(o)
+                                    }
+                                }
+
+                            })
+
+                            return matches.length //o.name.toLowerCase().includes(query.toLowerCase())
+                        })
+
+                        self.dataset.items = results
+                        console.log("Resulrs___________", results)
+
+                        self.loading.model = false
+                    }
+                }
             }
         },
         watch: {
@@ -245,32 +354,19 @@
                 this.$emit('selected', value)
             },
             'toolbar.items.category.selected': function (value) {
-                console.log(value.name);
+                // console.log(value.name)
             },
             'search': function (value) {
                 this.searchform.query = value
-                this.$emit('search', value)
+                this.$emit('search', value, this.searchform)
             },
+            // 'old': function (value) {
+            //     this.dataset.selected = value
+            // }
         }
     }
 </script>
 
 <style lang="scss">
-    .searchform {
-        background: rgba(255,255,255,0.06);
-        border-radius: 2px;
-        display: block;
-        padding: 0.5rem 1rem;
-        color: white;
-
-        &-container {
-            position: relative;
-        }
-
-        + .icon {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-    }
+    //
 </style>

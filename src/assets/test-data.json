@@ -7,15 +7,15 @@
         "icon": "image"
     },
     {
-        "name": "Beach",
-        "thumbnail": "//source.unsplash.com/900x600?beach",
-        "mimetype": "image/png",
+        "name": "A Poem",
+        "thumbnail": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mOczuD+HwAD8wHfmX400gAAAABJRU5ErkJggg==",
+        "mimetype": "text/plain",
         "size": "620KB",
         "icon": "image"
     },
     {
-        "name": "Mountains",
-        "thumbnail": "//source.unsplash.com/900x600?mountains",
+        "name": "Beach",
+        "thumbnail": "//source.unsplash.com/900x600?waterfalls",
         "mimetype": "image/png",
         "size": "166KB",
         "icon": "image"
