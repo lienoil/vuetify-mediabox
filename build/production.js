@@ -4,7 +4,7 @@ function install (Vue) {
   Vue.component('v-mediabox', Mediabox);
 };
 
-module.exports = install
+export default install
 
 if (typeof window !== 'undefined' && window.Vue) {
   Vue.use(install)
