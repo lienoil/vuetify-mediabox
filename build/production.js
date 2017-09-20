@@ -1,7 +1,7 @@
-import Vuetify-mediabox from '../src/Component.vue'
+import Mediabox from '../src/Mediabox.vue'
 
 function install (Vue) {
-  Vue.component('v-mediabox', Vuetify-mediabox);
+  Vue.component('v-mediabox', Mediabox);
 };
 
 module.exports = install

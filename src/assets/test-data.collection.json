@@ -4,7 +4,8 @@
         "thumbnail": "//source.unsplash.com/1000x900?fall",
         "mimetype": "image/png",
         "size": "720KB",
-        "icon": "image"
+        "icon": "image",
+        "active": false
     },
     {
         "name": "Leaf",
@@ -15,7 +16,7 @@
     },
     {
         "name": "Let There Be Rock",
-        "thumbnail": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mOczuD+HwAD8wHfmX400gAAAABJRU5ErkJggg==",
+        "thumbnail": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkSGH4DwACNQFldhfkmgAAAABJRU5ErkJggg==",
         "mimetype": "audio/mp3",
         "size": "620KB",
         "icon": "music_note"
@@ -49,50 +50,50 @@
         "icon": "image"
     },
     {
-        "name": "Fall",
-        "thumbnail": "//source.unsplash.com/1000x900?fall",
+        "name": "wood",
+        "thumbnail": "//source.unsplash.com/1000x900?wood",
         "mimetype": "image/png",
         "size": "720KB",
         "icon": "image"
     },
     {
-        "name": "Autumn",
-        "thumbnail": "//source.unsplash.com/1000x900?Autumn",
+        "name": "winter",
+        "thumbnail": "//source.unsplash.com/1000x900?winter",
         "mimetype": "image/png",
         "size": "620KB",
         "icon": "image"
     },
     {
-        "name": "Let There Be Rock",
+        "name": "Rock",
         "thumbnail": "//source.unsplash.com/1000x900?rock",
         "mimetype": "audio/mp3",
         "size": "620KB",
         "icon": "music_note"
     },
     {
-        "name": "Mountains",
-        "thumbnail": "//source.unsplash.com/1000x900?mountains",
+        "name": "river",
+        "thumbnail": "//source.unsplash.com/1000x900?river",
         "mimetype": "image/png",
         "size": "166KB",
         "icon": "image"
     },
     {
-        "name": "Lake",
-        "thumbnail": "//source.unsplash.com/1000x900?lake",
+        "name": "house",
+        "thumbnail": "//source.unsplash.com/1000x900?house",
         "mimetype": "image/png",
         "size": "126KB",
         "icon": "image"
     },
     {
-        "name": "Smile",
-        "thumbnail": "//source.unsplash.com/1000x900?smile",
+        "name": "planet",
+        "thumbnail": "//source.unsplash.com/1000x900?planet",
         "mimetype": "image/png",
         "size": "126KB",
         "icon": "image"
     },
     {
-        "name": "snow",
-        "thumbnail": "//source.unsplash.com/1000x900?snow",
+        "name": "bird",
+        "thumbnail": "//source.unsplash.com/1000x900?bird",
         "mimetype": "image/png",
         "size": "126KB",
         "icon": "image"

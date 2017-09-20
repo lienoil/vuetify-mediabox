@@ -2,6 +2,13 @@
 
 > A Vue.js UMD project
 
+## Dependencies
+```
+"vue": "^2.4.4",
+"vue-resource": "^1.3.4",
+"vuetify": "^0.15.2"
+```
+
 ## Build Setup
 
 ``` bash

@@ -65,13 +65,13 @@
                 <v-layout row wrap fill-height>
 
                     <slot name="content">
-                        <v-flex v-for="(dataset, i) in api().dataset().get()" :key="i">
+                        <v-flex v-for="(dataset, i) in dataset.items" :key="i" sm3>
                             <v-slide-y-transition>
-                                <div class="media--item" role="button" @click="mediabox().select(dataset)">
+                                <div class="media--item" role="button" @click.stop="mediabox().select(dataset)">
                                     <!-- @click.stop="computedDataset.select($event, item)" -->
                                     <slot name="media">
-                                        <v-card class="elevation-1">
-                                            <v-card-media style="min-width:300px" :height="height" :src="dataset.thumbnail">
+                                        <v-card transition="scale-transition" class="accent" :class="dataset.active?'elevation-10':'elevation-1'">
+                                            <v-card-media :height="height" :src="dataset.thumbnail">
                                                 <v-container fill-height fluid class="pa-0 white--text">
                                                     <v-layout column>
                                                         <v-card-title class="subheading" v-html="dataset.name"></v-card-title>
@@ -94,9 +94,6 @@
                             </v-slide-y-transition>
                         </v-flex>
                     </slot>
-
-                    <slot name="output" :output="dataset.selected"></slot>
-
                 </v-layout>
             </v-container>
         </v-card>
@@ -112,8 +109,9 @@
         props: {
             categories: { type: Array, default: () => { return [] } },
             height: { type: String, default: '250px' },
-            multiple: { type: Boolean, default: false },
-            old: { type: Array, default: () => { return [] } },
+            closeOnClick: { type: Boolean, default: false },
+            multiple: { type: Boolean, default: true },
+            old: { type: [Array, Object], default: () => { return [] } },
             open: true,
             search: { type: String, default: null },
             selected: {},
@@ -179,7 +177,8 @@
             this.searchform.query = this.search
 
             this.api().get(this.toolbar.items.category.selected.url, this.toolbar.items.category.selected.query).then(data => {
-                this.dataset.items = data.items
+                this.dataset.selected = this.old
+                this.api().dataset().set(data.items)
             })
         },
         methods: {
@@ -190,39 +189,79 @@
                     dataset () {
                         return {
                             set (items) {
-                                self.dataset.items = Object.assign(self.dataset.selected, items)
-                                self.dataset.clone = Object.assign(self.dataset.selected, items)
+                                items.map(item => {
+                                    item = (typeof item.active == 'undefined') ? Object.assign(item, {active: false}) : item
+
+                                    let index = self.dataset.selected.findIndex((i) => {
+                                        let i2 = JSON.parse(JSON.stringify(i)) // clone
+                                        let item2 = JSON.parse(JSON.stringify(item)) // clone
+                                        i2.active = false
+                                        item2.active = false
+                                        return JSON.stringify(i2) == JSON.stringify(item2)
+                                    });
+                                    if (index > -1) {
+                                        item.active = true
+                                    }
+                                })
+
+                                self.dataset.items = items
+                                self.dataset.clone = JSON.parse(JSON.stringify(items))
+
                                 self.$emit('set-items', self.dataset.items)
                                 return self
                             },
 
                             get () {
                                 self.$emit('get-items', self.dataset.items)
+
                                 return self.dataset.items
                             },
 
                             select (selected) {
-                                console.log(self.multiple)
-                                if (self.multiple) {
-                                    if (selected.active) {
-                                        selected.active = false
-                                        self.dataset.selected.splice(selected, 1)
-                                        self.$emit('item-selected', self.dataset.selected)
 
-                                        return self
-                                    }
-                                    selected.active = true
-                                    self.dataset.selected.push(selected)
+                                if (self.multiple) {
+                                    self.api().dataset().multiple(selected)
                                 } else {
-                                    // Single
-                                    selected.active = true
-                                    self.dataset.selected = selected
+                                    self.api().dataset().single(selected)
                                 }
 
-                                self.$emit('item-selected', self.dataset.selected)
+                                self.$emit('item-selected', self.dataset.selected, self.dataset.items)
 
                                 return self
+                            },
+
+                            single (selected) {
+                                self.dataset.selected = []
+                                self.dataset.items.map(item => {
+                                    item.active = false
+                                })
+                                self.api().dataset().multiple(selected)
+                            },
+
+                            multiple (selected) {
+                                selected.active = !selected.active
+
+                                if (selected.active) {
+                                    // Check if exists
+                                    self.api().dataset().unselect(selected)
+                                    self.dataset.selected.push(selected)
+                                } else {
+                                    self.api().dataset().unselect(selected)
+                                }
+                            },
+
+                            unselect (selected) {
+                                self.dataset.selected.forEach((item, i) => {
+                                    let item2 = JSON.parse(JSON.stringify(item))
+                                    let selected2 = JSON.parse(JSON.stringify(selected))
+                                    item2.active = false
+                                    item2.active = false
+                                    if (JSON.stringify(item2) === JSON.stringify(selected2)) {
+                                        self.dataset.selected.splice(i, 1)
+                                    }
+                                })
                             }
+
                         }
                     },
 
@@ -266,9 +305,8 @@
                 return {
                     select (item) {
                         self.api().dataset().select(item)
-                        // self.searchbox().clear()
 
-                        if (! self.multiple) {
+                        if (self.closeOnClick) {
                             self.dialogbox().toggle()
                         }
                     }
@@ -321,13 +359,13 @@
                                 console.log(key[0].toString(), key[1].toString(), query.toLowerCase())
 
                                 if (specificQuery[1]) {
-                                    if (key[0].toString().toLowerCase().includes(specificQuery[0].toString().toLowerCase())) {
-                                        if (key[1].toString().toLowerCase().includes(specificQuery[1].trim().toString().toLowerCase())) {
+                                    if (key[0].toString().trim().toLowerCase().includes(specificQuery[0].toString().trim().toLowerCase())) {
+                                        if (key[1].toString().trim().toLowerCase().includes(specificQuery[1].toString().trim().toLowerCase())) {
                                             matches.push(o)
                                         }
                                     }
                                 } else {
-                                    if (key[1].toString().toLowerCase().includes(query.trim().toString().toLowerCase())) {
+                                    if (key[1].toString().trim().toLowerCase().includes(query.toString().trim().toLowerCase())) {
                                         matches.push(o)
                                     }
                                 }
@@ -351,7 +389,7 @@
                 this.$emit('input', value)
             },
             'dataset.selected': function (value) {
-                this.$emit('selected', value)
+                this.$emit('selected', value, this.dataset.items)
             },
             'toolbar.items.category.selected': function (value) {
                 // console.log(value.name)
@@ -359,14 +397,7 @@
             'search': function (value) {
                 this.searchform.query = value
                 this.$emit('search', value, this.searchform)
-            },
-            // 'old': function (value) {
-            //     this.dataset.selected = value
-            // }
+            }
         }
     }
 </script>
-
-<style lang="scss">
-    //
-</style>

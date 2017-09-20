@@ -1,47 +1,50 @@
 <template>
   <div id="app">
     <v-app>
-      <v-container fluid>
-        <v-btn @click="model = true">test</v-btn>
+      <v-container fluid grid-list-lg>
+        <v-layout row wrap>
+          <v-flex>
+            <v-btn @click="model = true">Browse Media</v-btn>
+            <v-checkbox v-model="multiple" label="multiple" hide-details></v-checkbox>
+            <v-checkbox v-model="closeOnClick" label="Close on click" hide-details></v-checkbox>
+            <v-mediabox
+              :url="url"
+              v-model="model"
+              :categories="menus"
+              search
+              :multiple="multiple"
+              :close-on-click="closeOnClick"
+              :old="old"
+              @selected="getValue"
+            ></v-mediabox>
 
-        <v-mediabox
-          :url="url"
-          v-model="model"
-          :categories="menus"
-          search
-          multiple
-          :old='[{
-            "name": "Egypt",
-            "thumbnail": "//source.unsplash.com/900x600?egypt",
-            "mimetype": "image/png",
-            "size": "720KB",
-            "icon": "image",
-            "active": true
-          }]'
-          @selected="getValue"
-        ></v-mediabox>
+            <pre>
+              <span v-html="dataset"></span>
+            </pre>
 
-        <pre>
-          <span v-html="dataset"></span>
-        </pre>
-
-        <p>Display selected item from mediabox</p>
-        <v-card class="mb-3" v-for="(dataset, i) in dataset" :key="i" role="button" @click.stop="model = true">
-          <v-card-media height="250px" :src="dataset.thumbnail">
-            <v-container fill-height fluid class="pa-0 white--text">
-              <v-layout column>
-                <v-card-title class="subheading" v-html="dataset.name"></v-card-title>
-                <v-spacer></v-spacer>
-                <v-card-actions class="px-2 white--text">
-                  <v-icon class="white--text" v-html="dataset.icon"></v-icon>
-                  <v-spacer></v-spacer>
-                  <span v-html="dataset.mimetype"></span>
-                  <span v-html="dataset.size"></span>
-                </v-card-actions>
-              </v-layout>
-            </v-container>
-          </v-card-media>
-        </v-card>
+            <p>Display selected item from mediabox</p>
+          </v-flex>
+        </v-layout>
+        <v-layout row wrap>
+          <v-flex sm3 v-for="(dataset, i) in dataset" :key="i">
+            <v-card class="mb-3 accent" role="button" @click.stop="model = true">
+              <v-card-media height="250px" :src="dataset.thumbnail">
+                <v-container fill-height fluid class="pa-0 white--text">
+                  <v-layout column>
+                    <v-card-title class="subheading" v-html="dataset.name"></v-card-title>
+                    <v-spacer></v-spacer>
+                    <v-card-actions class="px-2 white--text">
+                      <v-icon class="white--text" v-html="dataset.icon"></v-icon>
+                      <v-spacer></v-spacer>
+                      <span v-html="dataset.mimetype"></span>
+                      <span v-html="dataset.size"></span>
+                    </v-card-actions>
+                  </v-layout>
+                </v-container>
+              </v-card-media>
+            </v-card>
+          </v-flex>
+        </v-layout>
       </v-container>
     </v-app>
   </div>
@@ -57,6 +60,17 @@ export default {
     return {
       model: false,
       dataset: null,
+      multiple: true,
+      closeOnClick: false,
+      old: [{
+            "id": "2",
+            "name": "Egypt",
+            "thumbnail": "//source.unsplash.com/900x600?egypt",
+            "mimetype": "image/png",
+            "size": "720KB",
+            "icon": "image",
+            "active": true
+          }],
       url: '../src/assets/test-data.json',
       menus: [
         {
@@ -86,6 +100,7 @@ export default {
   methods: {
     'getValue'(value) {
       this.dataset = value
+      this.old = value
     }
   }
 }
