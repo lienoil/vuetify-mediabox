@@ -3,7 +3,7 @@
   "description": "A media manager component for vuetify",
   "version": "1.0.1",
   "author": "John Lioneil Dionisio <john.dionisio1@gmail.com>",
-  "private": true,
+  "main": "src/index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
