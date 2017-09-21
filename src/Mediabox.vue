@@ -418,13 +418,15 @@
                             let matches = []
                             Object.entries(o).forEach((key, index) => {
                                 if (specificQuery && typeof specificQuery[1] != 'undefined') {
+                                    let compare = key[1] !== null ? key[1] : ""
                                     if (key[0].toString().trim().toLowerCase().includes(specificQuery[0].toString().trim().toLowerCase())) {
-                                        if (key[1].toString().trim().toLowerCase().includes(specificQuery[1].toString().trim().toLowerCase())) {
+                                        if (compare.toString().trim().toLowerCase().includes(specificQuery[1].toString().trim().toLowerCase())) {
                                             matches.push(o)
                                         }
                                     }
                                 } else {
-                                    if (key && key[1].toString().trim().toLowerCase().includes(query.toString().trim().toLowerCase())) {
+                                    let compare = key[1] !== null ? key[1] : ""
+                                    if (compare.toString().trim().toLowerCase().includes(query.toString().trim().toLowerCase())) {
                                         matches.push(o)
                                     }
                                 }
