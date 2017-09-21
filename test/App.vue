@@ -15,7 +15,6 @@
               search
               :multiple="multiple"
               :close-on-click="closeOnClick"
-              :old="old"
               @selected="getValue"
             ></v-mediabox>
 

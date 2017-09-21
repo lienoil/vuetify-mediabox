@@ -152,7 +152,7 @@
             old: { type: [Array, Object], default: () => { return [] } },
             open: true,
             toolbarLabel: { type: String, default: '' },
-            search: { type: String, default: null },
+            search: { type: String, default: '' },
             selected: {},
             url: { type: String, default: null },
         },
@@ -402,10 +402,11 @@
                     search (query, $event) {
                         self.loading.model = true
 
-                        self.dataset.items = self.dataset.clone
+                        // self.dataset.items = self.dataset.clone
+                        self.api().dataset().set(self.dataset.clone)
 
-                        let specificQuery = query.split(':');
-                        if (specificQuery.length > 1) {
+                        let specificQuery = query.split(':')
+                        if (specificQuery && specificQuery.length > 1) {
                             self.searchform.prepend = "fa-filter"
                         } else {
                             self.searchform.prepend = ""
@@ -416,27 +417,24 @@
                         let results = items.filter((o) => {
                             let matches = []
                             Object.entries(o).forEach((key, index) => {
-                                console.log(key[0].toString(), key[1].toString(), query.toLowerCase())
-
-                                if (specificQuery[1]) {
+                                if (specificQuery && typeof specificQuery[1] != 'undefined') {
                                     if (key[0].toString().trim().toLowerCase().includes(specificQuery[0].toString().trim().toLowerCase())) {
                                         if (key[1].toString().trim().toLowerCase().includes(specificQuery[1].toString().trim().toLowerCase())) {
                                             matches.push(o)
                                         }
                                     }
                                 } else {
-                                    if (key[1].toString().trim().toLowerCase().includes(query.toString().trim().toLowerCase())) {
+                                    if (key && key[1].toString().trim().toLowerCase().includes(query.toString().trim().toLowerCase())) {
                                         matches.push(o)
                                     }
                                 }
-
                             })
 
                             return matches.length //o.name.toLowerCase().includes(query.toLowerCase())
                         })
 
                         self.dataset.items = results
-                        console.log("Resulrs___________", results)
+                        // console.log("Resulrs___________", results)
 
                         self.loading.model = false
                     }
@@ -449,6 +447,20 @@
                 this.$emit('input', value)
             },
             'dataset.selected': function (value) {
+                this.dataset.clone.map(item => {
+                    item.active = false
+
+                    let index = value.findIndex((i) => {
+                        let i2 = JSON.parse(JSON.stringify(i)) // clone
+                        let item2 = JSON.parse(JSON.stringify(item)) // clone
+                        i2.active = false
+                        item2.active = false
+                        return JSON.stringify(i2) == JSON.stringify(item2)
+                    });
+                    if (index > -1) {
+                        item.active = true
+                    }
+                })
                 this.$emit('selected', value, this.dataset.items)
             },
             'toolbar.items.category.selected': function (value) {
