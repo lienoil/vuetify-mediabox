@@ -1,3 +1,3 @@
 import Mediabox from './Mediabox.vue'
 
-module.exports = Mediabox
+export default Mediabox
