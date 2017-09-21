@@ -1,7 +1,7 @@
 {
   "name": "vuetify-mediabox",
   "description": "A media manager component for vuetify",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "John Lioneil Dionisio <john.dionisio1@gmail.com>",
   "main": "src/index.js",
   "scripts": {
