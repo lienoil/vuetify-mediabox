@@ -8,9 +8,10 @@
             <v-checkbox v-model="multiple" label="multiple" hide-details></v-checkbox>
             <v-checkbox v-model="closeOnClick" label="Close on click" hide-details></v-checkbox>
             <v-mediabox
+              toolbar-label="Catalogues"
               :url="url"
-              v-model="model"
               :categories="menus"
+              v-model="model"
               search
               :multiple="multiple"
               :close-on-click="closeOnClick"
@@ -78,6 +79,7 @@ export default {
           name: 'All',
           count: '4',
           code: 'perm_media',
+          active: true,
           url: '../src/assets/test-data.json',
         },
         {
